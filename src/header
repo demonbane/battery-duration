@@ -1,0 +1,48 @@
+#!/usr/bin/env bash
+set -e
+x=1
+
+while getopts "hqf:" opt; do
+	case "$opt" in
+		q) quiet=true;;
+		f) file="${OPTARG}";;
+		h|\?) printf 'Usage: %s [-q] [-f FILE]
+	-q	Quiet mode. Only show daily totals, not each event.
+	-f	Use file for input instead of `pmset -g log`. Use - for STDIN.\n' \
+		"$(basename "$0")"; exit 0;;
+	esac
+	x=$OPTIND
+done
+shift $((x-1))
+
+main() {
+hash gawk 2> /dev/null && hash -p "$(hash -t gawk)" awk
+hash mktemp 2> /dev/null || { printf 'mktemp is required but unavailable, aborting\n' >2 && exit 1; }
+loadawk || { printf 'Unable to create temp file, aborting\n' >2 && exit 1; }
+
+if [[ -n "$file" && -r "$file" ]]; then
+	infile="$file"
+	cmd="awk -v quiet=$quiet -f $tempfile $file"
+	#awk -v quiet="$quiet" -f battery-duration.awk "$file"
+elif [[ -n "$file" && "$file" == "-" ]]; then
+	infile="STDIN"
+	cmd="awk -v quiet=$quiet -f $tempfile"
+	#awk -v quiet="$quiet" -f battery-duration.awk
+else
+	infile="pmset -g log"
+	#cmd="pmset -g log \| awk -v quiet=\"$quiet\" -f \"$tempfile\""
+	cmd="awk -v quiet=$quiet -f $tempfile <(pmset -g log)"
+	#pmset -g log | awk -v quiet="$quiet" -f battery-duration.awk
+fi
+
+printf 'Reading input from: %s\n' "$infile"
+eval $cmd
+}
+
+cleanup() {
+	rm -f "$tempfile"
+}
+
+loadawk() {
+	tempfile="$(mktemp -t batt-dur.XXXX)"
+	cat - > "$tempfile" <<'EndOfAwk'

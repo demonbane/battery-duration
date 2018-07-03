@@ -86,7 +86,7 @@ firstwake && /Using AC/ {
 		totaltime+=unixtime()-lastwake
 		lastsleep=unixtime()
 		if (!quiet)
-			printf("%s (%s%%) (%s)*\n",$2,readcharge(),totaltime)
+			printf("%s (%s%%)*\n",$2,readcharge())
 	}
 	if (!quiet)
 		printf("--------------------\nCharging at %s (%s%%)\n", $2,readcharge())
@@ -109,7 +109,7 @@ firstwake && /Using AC/ {
 		totaltime+=lastsleep-firstwake
 		lastwake=0
 		if (!quiet)
-			printf("%s (%s%%) (%s)\n", $2, currentcharge,totaltime)
+			printf("%s (%s%%)\n", $2, currentcharge)
 		lastmatch=$4
 	}
 	next
@@ -133,6 +133,7 @@ END {
 			printf("present (%i%%)*\n",$3)
 		$1=strftimef("%F",systimef())
 		$2=strftimef("%T",systimef())
+		totaltime+=unixtime()-lastwake
 		printreport()
 	}
 }
