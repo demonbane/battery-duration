@@ -17,8 +17,8 @@ shift $((x-1))
 
 main() {
 hash gawk 2> /dev/null && hash -p "$(hash -t gawk)" awk
-hash mktemp 2> /dev/null || { printf 'mktemp is required but unavailable, aborting\n' >2 && exit 1; }
-loadawk || { printf 'Unable to create temp file, aborting\n' >2 && exit 1; }
+hash mktemp 2> /dev/null || { printf 'mktemp is required but unavailable, aborting\n' >&2 && exit 1; }
+loadawk || { printf 'Unable to create temp file, aborting\n' >&2 && exit 1; }
 
 if [[ -n "$file" && -r "$file" ]]; then
 	infile="$file"
