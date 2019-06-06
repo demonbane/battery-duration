@@ -1,10 +1,8 @@
 #!/usr/bin/awk -f
 # vim: sw=4:ts=4
 function clearvars() {
-	#if (lastsleep > lastwake) {
-		lastwake=0
-		firstwake=0
-	#}
+	lastwake=0
+	firstwake=0
 	totaltime=0
 	lastsleep=0
 	days=0
